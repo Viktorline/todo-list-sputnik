@@ -13,6 +13,11 @@ export const getTasks = async (params = {}) => {
   return response.data;
 };
 
+export const getTaskById = async (id: string) => {
+  const response = await api.get(`/tasks/${id}`);
+  return response.data;
+};
+
 export const postTask = async (
   title: string,
   description: string,

@@ -39,10 +39,22 @@ const StyledMenu = styled(Menu)`
 `;
 
 function Header() {
-  const { setFilter } = useTaskStore();
+  const { setFilter, fetchTasksByIds, fetchTasks } = useTaskStore();
 
   const handleClick = (e: { key: string }) => {
-    setFilter(e.key as FilterType);
+    const filter = e.key as FilterType;
+
+    setFilter(filter);
+    if (filter === 'favorite') {
+      const favoriteIds = JSON.parse(
+        localStorage.getItem('favoriteIds') || '[]'
+      );
+      fetchTasksByIds(favoriteIds);
+    } else {
+      const params =
+        filter === 'all' ? {} : { filters: { status: { $eq: filter } } };
+      fetchTasks(params);
+    }
   };
 
   return (

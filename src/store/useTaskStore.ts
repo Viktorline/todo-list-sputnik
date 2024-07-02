@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { FilterType, TaskOwn, TaskType } from './types';
-import { postTask, getTasks, deleteTask, putTask } from '../api/todoApi';
+import {
+  postTask,
+  getTasks,
+  deleteTask,
+  putTask,
+  getTaskById,
+} from '../api/todoApi';
 
 export interface TaskState {
   tasks: TaskOwn[];
@@ -17,6 +23,7 @@ export interface TaskState {
     status: TaskType
   ) => void;
   fetchTasks: (params: any) => void;
+  fetchTasksByIds: (ids: string[]) => void;
   deleteTask: (id: string) => void;
   toggleFavorite: (id: string) => void;
 }
@@ -53,7 +60,25 @@ export const useTaskStore = create<TaskState>((set) => ({
       });
     } catch (error) {
       set({
-        error: 'Ошибка загрузки сообщений. Попробуйте перезагрузить страницу',
+        error: 'Ошибка загрузки задач. Попробуйте перезагрузить страницу',
+        isLoadingLists: false,
+      });
+    }
+  },
+
+  fetchTasksByIds: async (ids: string[]) => {
+    set({ isLoadingLists: true });
+    try {
+      const tasks = await Promise.all(
+        ids.map((id) => getTaskById(id).then((res) => res.data))
+      );
+      set({
+        tasks: tasks.reverse(),
+        isLoadingLists: false,
+      });
+    } catch (error) {
+      set({
+        error: 'Ошибка загрузки задач. Попробуйте перезагрузить страницу',
         isLoadingLists: false,
       });
     }

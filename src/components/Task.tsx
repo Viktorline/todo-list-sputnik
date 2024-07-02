@@ -63,6 +63,7 @@ const CheckButton = styled(Button)`
     color: white !important;
   }
 `;
+
 const StarButton = styled(Button)`
   background-color: #fff;
   border-color: #d9d9d9;
