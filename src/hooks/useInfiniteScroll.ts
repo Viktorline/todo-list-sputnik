@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
+import { SCROLL_LOAD_DELAY } from '../constants/constants';
 
 const useInfiniteScroll = (
   callback: () => Promise<void>,
   isFetching: boolean,
-  delay: number = 150
+  delay: number = SCROLL_LOAD_DELAY
 ) => {
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastElementRef = useRef<HTMLDivElement | null>(null);
+  const lastElementRef = useRef<HTMLLIElement | null>(null);
 
   useEffect(() => {
     if (observer.current) observer.current.disconnect();

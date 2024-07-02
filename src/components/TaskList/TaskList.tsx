@@ -1,13 +1,15 @@
-import styled from 'styled-components';
-import Task from './Task';
 import { useEffect, useState } from 'react';
-import { TaskOwn, TaskType } from '../store/types';
-import useInfiniteScroll from '../hooks/useInfiniteScroll';
-
-const Wrapper = styled.div`
-  overflow-y: auto;
-  flex: 1;
-`;
+import { TaskOwn, TaskType } from '../../models';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import { SCROLL_LOAD_THRESHOLD_MESSAGE } from '../../constants/constants';
+import Task from '../Task/Task';
+import { Wrapper } from './TaskList.styles';
+import {
+  EDIT_BUTTON,
+  FILTER_COMPLETED_EN,
+  FILTER_NOT_COMPLETED_EN,
+  LOCAL_STORAGE_FOLDER,
+} from '../../constants/texts';
 
 function TaskList({
   tasks,
@@ -17,7 +19,7 @@ function TaskList({
   deleteTask,
   toggleFavorite,
 }: {
-  tasks: any;
+  tasks: TaskOwn[];
   favoriteIds: string[];
   fetchTasks: () => Promise<void>;
   editTask: (
@@ -32,7 +34,9 @@ function TaskList({
   const [editableTaskId, setEditableTaskId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editStatus, setEditStatus] = useState<TaskType>('notCompleted');
+  const [editStatus, setEditStatus] = useState<TaskType>(
+    FILTER_NOT_COMPLETED_EN
+  );
   const [isFetching, setIsFetching] = useState(false);
 
   const handleFavoriteToggle = (id: string) => {
@@ -58,20 +62,20 @@ function TaskList({
     setEditableTaskId(null);
     setEditTitle('');
     setEditDescription('');
-    setEditStatus('notCompleted');
+    setEditStatus(FILTER_NOT_COMPLETED_EN);
   };
 
   const handleCheck = (task: TaskOwn) => {
-    task.attributes.status === 'completed'
-      ? handleSave(task.id, 'notCompleted', task)
-      : handleSave(task.id, 'completed', task);
+    task.attributes.status === FILTER_COMPLETED_EN
+      ? handleSave(task.id, FILTER_NOT_COMPLETED_EN, task)
+      : handleSave(task.id, FILTER_COMPLETED_EN, task);
   };
 
   const handleClose = () => {
     setEditableTaskId(null);
     setEditTitle('');
     setEditDescription('');
-    setEditStatus('notCompleted');
+    setEditStatus(FILTER_NOT_COMPLETED_EN);
   };
 
   const handleDelete = (id: string) => {
@@ -80,7 +84,7 @@ function TaskList({
 
   useEffect(() => {
     const savedFavoriteIds = JSON.parse(
-      localStorage.getItem('favoriteIds') || '[]'
+      localStorage.getItem(LOCAL_STORAGE_FOLDER) || '[]'
     );
     savedFavoriteIds.forEach((id: string) => {
       if (!favoriteIds.includes(id)) toggleFavorite(id);
@@ -89,7 +93,6 @@ function TaskList({
 
   const handleFetchTasks = async () => {
     if (isFetching) return;
-
     setIsFetching(true);
     await fetchTasks();
     setIsFetching(false);
@@ -104,7 +107,8 @@ function TaskList({
         const isEditable = editableTaskId === task.id;
         const isFavorite = favoriteIds.includes(task.id);
 
-        const isLastElement = tasks.length - 5 === index;
+        const isLastElement =
+          tasks.length - SCROLL_LOAD_THRESHOLD_MESSAGE === index;
 
         return (
           <Task
@@ -123,7 +127,7 @@ function TaskList({
             onDescriptionChange={setEditDescription}
             onStatusChange={setEditStatus}
             onFavoriteToggle={() => handleFavoriteToggle(task.id)}
-            buttonText={'Изменить'}
+            buttonText={EDIT_BUTTON}
             isFavorite={isFavorite}
             wrapperRef={isLastElement ? lastElementRef : null}
           />

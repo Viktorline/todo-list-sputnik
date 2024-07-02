@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { FilterType, TaskOwn, TaskType } from './types';
+import { FetchTasksParams, FilterType, TaskOwn, TaskType } from '../models';
 import {
   postTask,
   getTasks,
@@ -7,6 +7,12 @@ import {
   putTask,
   getTaskById,
 } from '../api/todoApi';
+import {
+  ERROR_LOADING_TASKS,
+  FILTER_ALL_EN,
+  FILTER_FAVORITE_EN,
+  LOCAL_STORAGE_FOLDER,
+} from '../constants/texts';
 
 export interface TaskState {
   tasks: TaskOwn[];
@@ -24,7 +30,7 @@ export interface TaskState {
     description: string,
     status: TaskType
   ) => void;
-  fetchTasks: (params?: any, isLoadMore?: boolean) => void;
+  fetchTasks: (params?: FetchTasksParams, isLoadMore?: boolean) => void;
   fetchTasksByIds: (ids: string[]) => void;
   deleteTask: (id: string) => void;
   toggleFavorite: (id: string) => void;
@@ -35,7 +41,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   filter: 'all',
   error: null,
   isLoadingLists: false,
-  favoriteIds: JSON.parse(localStorage.getItem('favoriteIds') || '[]'),
+  favoriteIds: JSON.parse(localStorage.getItem(LOCAL_STORAGE_FOLDER) || '[]'),
   currentPage: 1,
   totalPages: 1,
 
@@ -48,16 +54,25 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         ? state.favoriteIds.filter((favId) => favId !== id)
         : [...state.favoriteIds, id];
 
-      localStorage.setItem('favoriteIds', JSON.stringify(newFavoriteIds));
+      localStorage.setItem(
+        LOCAL_STORAGE_FOLDER,
+        JSON.stringify(newFavoriteIds)
+      );
 
       return { favoriteIds: newFavoriteIds };
     });
   },
 
-  fetchTasks: async (params: any = {}, isLoadMore: boolean = false) => {
+  fetchTasks: async (
+    params: FetchTasksParams = {},
+    isLoadMore: boolean = false
+  ) => {
     const { currentPage, filter, totalPages } = get();
 
-    if (filter === 'favorite' || (currentPage >= totalPages && isLoadMore))
+    if (
+      filter === FILTER_FAVORITE_EN ||
+      (currentPage >= totalPages && isLoadMore)
+    )
       return;
 
     set({ isLoadingLists: !isLoadMore ? true : false, error: null });
@@ -65,7 +80,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const page = isLoadMore ? currentPage + 1 : 1;
       const queryParams = {
         ...params,
-        ...(filter !== 'all' && { filters: { status: { $eq: filter } } }),
+        ...(filter !== FILTER_ALL_EN && {
+          filters: { status: { $eq: filter } },
+        }),
         pagination: {
           page,
           pageSize: 25,
@@ -91,7 +108,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       }));
     } catch (error) {
       set({
-        error: 'Ошибка загрузки задач. Попробуйте перезагрузить страницу',
+        error: ERROR_LOADING_TASKS,
         isLoadingLists: false,
       });
     }
@@ -109,7 +126,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       });
     } catch (error) {
       set({
-        error: 'Ошибка загрузки задач. Попробуйте перезагрузить страницу',
+        error: ERROR_LOADING_TASKS,
         isLoadingLists: false,
       });
     }
@@ -142,8 +159,23 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   deleteTask: async (id: string) => {
     await deleteTask(id);
-    set((state) => ({
-      tasks: state.tasks.filter((task) => task.id !== id),
-    }));
+    set((state) => {
+      const updatedTasks = state.tasks.filter((task) => task.id !== id);
+      const favoriteIds = JSON.parse(
+        localStorage.getItem(LOCAL_STORAGE_FOLDER) || '[]'
+      );
+      const newFavoriteIds = favoriteIds.filter(
+        (favoriteId: string) => favoriteId !== id
+      );
+      localStorage.setItem(
+        LOCAL_STORAGE_FOLDER,
+        JSON.stringify(newFavoriteIds)
+      );
+
+      return {
+        tasks: updatedTasks,
+        favoriteIds: newFavoriteIds,
+      };
+    });
   },
 }));

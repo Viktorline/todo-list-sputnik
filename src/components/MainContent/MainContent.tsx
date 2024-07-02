@@ -1,40 +1,29 @@
-import styled from 'styled-components';
-import Task from './Task';
 import { useEffect, useState } from 'react';
-import { useTaskStore } from '../store/useTaskStore';
+import { useTaskStore } from '../../store/useTaskStore';
 import { Alert, Spin } from 'antd';
-import TaskList from './TaskList';
-import { TaskType } from '../store/types';
+import { TaskType } from '../../models';
+import TaskList from '../TaskList/TaskList';
+import Task from '../Task/Task';
+import { ADD_BUTTON, FILTER_NOT_COMPLETED_EN } from '../../constants/texts';
+import { SpinWrapper, Wrapper, NoTasksMessage } from './MainContent.styles';
 
-const Wrapper = styled.main`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
-
-const SpinWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-`;
-
-function Container() {
+function MainContent() {
   const {
     tasks,
-    isLoadingLists,
     error,
     favoriteIds,
+    isLoadingLists,
     addTask,
     editTask,
     deleteTask,
-    toggleFavorite,
     fetchTasks,
+    toggleFavorite,
   } = useTaskStore();
 
-  const [mode, setMode] = useState<'await' | 'create' | 'view'>('await');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<TaskType>('notCompleted');
+  const [status, setStatus] = useState<TaskType>(FILTER_NOT_COMPLETED_EN);
+  const [mode, setMode] = useState<'await' | 'create' | 'view'>('await');
 
   useEffect(() => {
     fetchTasks({});
@@ -51,20 +40,19 @@ function Container() {
     setMode('await');
     setTitle('');
     setDescription('');
-    setStatus('notCompleted');
+    setStatus(FILTER_NOT_COMPLETED_EN);
   };
 
   const handleClose = () => {
     setMode('await');
     setTitle('');
     setDescription('');
-    setStatus('notCompleted');
+    setStatus(FILTER_NOT_COMPLETED_EN);
   };
 
   return (
     <Wrapper>
       <Task
-        id={'123131313'}
         mode={mode}
         title={title}
         description={description}
@@ -75,19 +63,21 @@ function Container() {
         onTitleChange={setTitle}
         onDescriptionChange={setDescription}
         onStatusChange={setStatus}
-        buttonText={'Добавить'}
+        buttonText={ADD_BUTTON}
       />
 
       {error ? (
-        <Alert message={'error'} type='error' />
+        <Alert message={error} type='error' />
       ) : isLoadingLists ? (
         <SpinWrapper>
           <Spin size='large' />
         </SpinWrapper>
+      ) : tasks.length === 0 ? (
+        <NoTasksMessage>Задач по текущему фильтру нет</NoTasksMessage>
       ) : (
         <TaskList
-          favoriteIds={favoriteIds}
           tasks={tasks}
+          favoriteIds={favoriteIds}
           editTask={editTask}
           deleteTask={deleteTask}
           toggleFavorite={toggleFavorite}
@@ -98,4 +88,4 @@ function Container() {
   );
 }
 
-export default Container;
+export default MainContent;

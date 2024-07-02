@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
+import App from './components/App/App.tsx';
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`

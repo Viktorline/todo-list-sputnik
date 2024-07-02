@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TaskType } from '../store/types';
+import { TaskType } from '../models';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
