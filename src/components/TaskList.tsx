@@ -5,7 +5,7 @@ import { TaskOwn, TaskType } from '../store/types';
 
 const Wrapper = styled.ul`
   overflow-y: auto;
-  padding: 0;
+  flex: 1;
 `;
 
 function TaskList({

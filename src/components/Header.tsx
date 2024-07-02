@@ -1,6 +1,6 @@
 import { Menu } from 'antd';
 import { useTaskStore } from '../store/useTaskStore';
-import { filterItems } from '../content/constants';
+import { filterTypes } from '../content/constants';
 import { FilterType } from '../store/types';
 import { styled } from 'styled-components';
 
@@ -63,7 +63,7 @@ function Header() {
         disabledOverflow
         onClick={handleClick}
         mode='horizontal'
-        items={filterItems}
+        items={filterTypes}
         defaultSelectedKeys={['all']}
       />
     </Wrapper>

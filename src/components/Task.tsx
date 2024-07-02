@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import styled from 'styled-components';
-import { Button, Col, Input, Select, Tooltip } from 'antd';
+import { Button, Input, Select, Tooltip } from 'antd';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { taskTypes } from '../content/constants';
 import {
@@ -25,6 +25,18 @@ const Wrapper = styled.div`
   }
 `;
 
+const TaskWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
 const TitleInput = styled(Input)`
   margin-bottom: 0.5rem;
 `;
@@ -41,9 +53,14 @@ const Controls = styled.div`
 `;
 
 const TextWrapper = styled.div`
-  word-wrap: break-word;
+  flex: 1;
+  word-break: break-word;
   white-space: normal;
 `;
+
+const Header = styled.h3``;
+
+const Description = styled.p``;
 
 const CheckButton = styled(Button)`
   &.completed {
@@ -85,6 +102,7 @@ const StarButton = styled(Button)`
     color: white !important;
   }
 `;
+
 const EditButton = styled(Button)`
   &:hover {
     border-color: #2b7de1 !important;
@@ -152,8 +170,8 @@ function Task({
     <Wrapper key={id} className={status === 'completed' ? 'completed' : ''}>
       <div ref={editorFieldRef}>
         {mode === 'view' ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Col style={{ display: 'flex', gap: '0.5rem' }}>
+          <TaskWrapper>
+            <ButtonGroup>
               <Tooltip
                 title={
                   isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'
@@ -181,22 +199,19 @@ function Task({
               <Tooltip title='Редактировать'>
                 <EditButton onClick={onClick} icon={<EditOutlined />} />
               </Tooltip>
-            </Col>
-            <Col flex='auto'>
-              <TextWrapper>
-                <h3>{title}</h3>
-                <span>{description}</span>
-              </TextWrapper>
-            </Col>
-            <Col>
-              <Tooltip title='Удалить'>
-                <BucketButton
-                  onClick={() => onDelete!(id)}
-                  icon={<DeleteOutlined />}
-                />
-              </Tooltip>
-            </Col>
-          </div>
+            </ButtonGroup>
+            <TextWrapper>
+              <Header>{title}</Header>
+              <Description>{description}</Description>
+            </TextWrapper>
+
+            <Tooltip title='Удалить'>
+              <BucketButton
+                onClick={() => onDelete!(id)}
+                icon={<DeleteOutlined />}
+              />
+            </Tooltip>
+          </TaskWrapper>
         ) : (
           <TitleInput
             placeholder={mode === 'await' ? 'Добавить задачу' : 'Заголовок'}

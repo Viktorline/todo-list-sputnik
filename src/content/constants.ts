@@ -1,4 +1,4 @@
-export const filterItems = [
+export const filterTypes = [
   { label: 'Все', key: 'all' },
   { label: 'Выполненные', key: 'completed' },
   { label: 'Не выполненные', key: 'notCompleted' },

@@ -1,30 +1,41 @@
 import styled from 'styled-components';
 import Header from './components/Header';
-import Main from './components/Main';
+import Container from './components/Container';
 
-const Wrapper = styled.div`
-  width: 100%;
-  min-height: 100vh;
-  padding: 2rem;
-  background: beige;
+const Background = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  min-height: 100vh;
+  overflow-y: hidden;
+  background: lightgray;
 `;
 
-const Container = styled.div`
+const Wrapper = styled.div`
   max-width: 750px;
   width: 100%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+`;
+
+const MainWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 function App() {
   return (
-    <Wrapper>
-      <Container>
+    <Background>
+      <Wrapper>
         <Header />
-        <Main />
-      </Container>
-    </Wrapper>
+        <MainWrapper>
+          <Container />
+        </MainWrapper>
+      </Wrapper>
+    </Background>
   );
 }
 

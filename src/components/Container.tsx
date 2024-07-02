@@ -7,7 +7,9 @@ import TaskList from './TaskList';
 import { TaskType } from '../store/types';
 
 const Wrapper = styled.main`
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 const SpinWrapper = styled.div`
@@ -16,7 +18,7 @@ const SpinWrapper = styled.div`
   padding: 2rem;
 `;
 
-function Main() {
+function Container() {
   const {
     tasks,
     isLoadingLists,
@@ -75,6 +77,7 @@ function Main() {
         onStatusChange={setStatus}
         buttonText={'Добавить'}
       />
+
       {error ? (
         <Alert message={'error'} type='error' />
       ) : isLoadingLists ? (
@@ -94,4 +97,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default Container;
