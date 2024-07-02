@@ -14,6 +14,8 @@ export interface TaskState {
   filter: FilterType;
   isLoadingLists: boolean;
   error: string | null;
+  currentPage: number;
+  totalPages: number;
   setFilter: (filter: FilterType) => void;
   addTask: (title: string, description: string, status: TaskType) => void;
   editTask: (
@@ -22,18 +24,20 @@ export interface TaskState {
     description: string,
     status: TaskType
   ) => void;
-  fetchTasks: (params: any) => void;
+  fetchTasks: (params?: any, isLoadMore?: boolean) => void;
   fetchTasksByIds: (ids: string[]) => void;
   deleteTask: (id: string) => void;
   toggleFavorite: (id: string) => void;
 }
 
-export const useTaskStore = create<TaskState>((set) => ({
+export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   filter: 'all',
   error: null,
   isLoadingLists: false,
   favoriteIds: JSON.parse(localStorage.getItem('favoriteIds') || '[]'),
+  currentPage: 1,
+  totalPages: 1,
 
   setFilter: (filter: FilterType) => set({ filter }),
 
@@ -50,14 +54,41 @@ export const useTaskStore = create<TaskState>((set) => ({
     });
   },
 
-  fetchTasks: async (params: any) => {
-    set({ isLoadingLists: true, error: null });
+  fetchTasks: async (params: any = {}, isLoadMore: boolean = false) => {
+    const { currentPage, filter, totalPages } = get();
+
+    if (filter === 'favorite' || (currentPage >= totalPages && isLoadMore))
+      return;
+
+    set({ isLoadingLists: !isLoadMore ? true : false, error: null });
     try {
-      const newTask = await getTasks(params);
-      set({
-        tasks: (newTask.data as TaskOwn[]).reverse(),
+      const page = isLoadMore ? currentPage + 1 : 1;
+      const queryParams = {
+        ...params,
+        ...(filter !== 'all' && { filters: { status: { $eq: filter } } }),
+        pagination: {
+          page,
+          pageSize: 25,
+        },
+      };
+
+      const response = await getTasks(queryParams);
+
+      const newTasks = response.data as TaskOwn[];
+      const { page: newPage, pageCount } = response.meta.pagination;
+
+      const sortedTasks = newTasks.sort(
+        (a, b) =>
+          new Date(b.attributes.createdAt).getTime() -
+          new Date(a.attributes.createdAt).getTime()
+      );
+
+      set((state) => ({
+        tasks: isLoadMore ? [...state.tasks, ...sortedTasks] : sortedTasks,
         isLoadingLists: false,
-      });
+        currentPage: newPage,
+        totalPages: pageCount,
+      }));
     } catch (error) {
       set({
         error: 'Ошибка загрузки задач. Попробуйте перезагрузить страницу',

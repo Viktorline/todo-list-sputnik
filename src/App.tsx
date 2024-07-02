@@ -12,17 +12,21 @@ const Background = styled.div`
 `;
 
 const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   max-width: 750px;
   width: 100%;
   height: 90vh;
-  display: flex;
-  flex-direction: column;
+
+  @media (max-width: 850px) {
+    height: 100vh;
+  }
 `;
 
 const MainWrapper = styled.div`
-  flex: 1;
   display: flex;
   flex-direction: column;
+  flex: 1;
   overflow: hidden;
 `;
 

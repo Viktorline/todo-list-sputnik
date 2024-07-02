@@ -2,8 +2,9 @@ import styled from 'styled-components';
 import Task from './Task';
 import { useEffect, useState } from 'react';
 import { TaskOwn, TaskType } from '../store/types';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
-const Wrapper = styled.ul`
+const Wrapper = styled.div`
   overflow-y: auto;
   flex: 1;
 `;
@@ -11,12 +12,14 @@ const Wrapper = styled.ul`
 function TaskList({
   tasks,
   favoriteIds,
+  fetchTasks,
   editTask,
   deleteTask,
   toggleFavorite,
 }: {
   tasks: any;
   favoriteIds: string[];
+  fetchTasks: () => Promise<void>;
   editTask: (
     id: string,
     title: string,
@@ -30,6 +33,7 @@ function TaskList({
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editStatus, setEditStatus] = useState<TaskType>('notCompleted');
+  const [isFetching, setIsFetching] = useState(false);
 
   const handleFavoriteToggle = (id: string) => {
     toggleFavorite(id);
@@ -83,12 +87,24 @@ function TaskList({
     });
   }, [toggleFavorite, favoriteIds]);
 
+  const handleFetchTasks = async () => {
+    if (isFetching) return;
+
+    setIsFetching(true);
+    await fetchTasks();
+    setIsFetching(false);
+  };
+
+  const { lastElementRef } = useInfiniteScroll(handleFetchTasks, isFetching);
+
   return (
     <Wrapper>
-      {tasks.map((task: TaskOwn) => {
+      {tasks.map((task: TaskOwn, index: number) => {
         const { title, description, status } = task.attributes;
         const isEditable = editableTaskId === task.id;
         const isFavorite = favoriteIds.includes(task.id);
+
+        const isLastElement = tasks.length - 5 === index;
 
         return (
           <Task
@@ -109,6 +125,7 @@ function TaskList({
             onFavoriteToggle={() => handleFavoriteToggle(task.id)}
             buttonText={'Изменить'}
             isFavorite={isFavorite}
+            wrapperRef={isLastElement ? lastElementRef : null}
           />
         );
       })}

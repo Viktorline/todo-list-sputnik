@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { RefObject, useRef } from 'react';
 import styled from 'styled-components';
 import { Button, Input, Select, Tooltip } from 'antd';
 import { useClickOutside } from '../hooks/useClickOutside';
@@ -144,6 +144,7 @@ interface EditableBlockProps {
   onDescriptionChange: (value: string) => void;
   onStatusChange: (value: TaskType) => void;
   onFavoriteToggle?: () => void;
+  wrapperRef?: RefObject<HTMLDivElement> | null;
 }
 
 function Task({
@@ -163,11 +164,16 @@ function Task({
   onDescriptionChange,
   onStatusChange,
   onFavoriteToggle,
+  wrapperRef,
 }: EditableBlockProps) {
   const editorFieldRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Wrapper key={id} className={status === 'completed' ? 'completed' : ''}>
+    <Wrapper
+      ref={wrapperRef as React.RefObject<HTMLDivElement>}
+      key={id}
+      className={status === 'completed' ? 'completed' : ''}
+    >
       <div ref={editorFieldRef}>
         {mode === 'view' ? (
           <TaskWrapper>

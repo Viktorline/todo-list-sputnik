@@ -9,8 +9,8 @@ const Wrapper = styled.header`
 `;
 
 const StyledMenu = styled(Menu)`
-  width: 100%;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   padding: 0;
   background-color: #f8f8f8;
@@ -63,7 +63,10 @@ function Header() {
         disabledOverflow
         onClick={handleClick}
         mode='horizontal'
-        items={filterTypes}
+        items={filterTypes.map((type) => ({
+          ...type,
+          tabIndex: 0,
+        }))}
         defaultSelectedKeys={['all']}
       />
     </Wrapper>

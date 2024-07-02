@@ -24,11 +24,11 @@ function Container() {
     isLoadingLists,
     error,
     favoriteIds,
-    fetchTasks,
     addTask,
     editTask,
     deleteTask,
     toggleFavorite,
+    fetchTasks,
   } = useTaskStore();
 
   const [mode, setMode] = useState<'await' | 'create' | 'view'>('await');
@@ -87,10 +87,11 @@ function Container() {
       ) : (
         <TaskList
           favoriteIds={favoriteIds}
-          toggleFavorite={toggleFavorite}
+          tasks={tasks}
           editTask={editTask}
           deleteTask={deleteTask}
-          tasks={tasks}
+          toggleFavorite={toggleFavorite}
+          fetchTasks={async () => fetchTasks({}, true)}
         />
       )}
     </Wrapper>
