@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import Task from './Task';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TaskOwn, TaskType } from '../store/types';
 
 const Wrapper = styled.ul`
@@ -10,10 +10,13 @@ const Wrapper = styled.ul`
 
 function TaskList({
   tasks,
+  favoriteIds,
   editTask,
   deleteTask,
+  toggleFavorite,
 }: {
   tasks: any;
+  favoriteIds: string[];
   editTask: (
     id: string,
     title: string,
@@ -21,11 +24,16 @@ function TaskList({
     status: TaskType
   ) => void;
   deleteTask: (id: string) => void;
+  toggleFavorite: (id: string) => void;
 }) {
   const [editableTaskId, setEditableTaskId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editStatus, setEditStatus] = useState('');
+  const [editStatus, setEditStatus] = useState<TaskType>('notCompleted');
+
+  const handleFavoriteToggle = (id: string) => {
+    toggleFavorite(id);
+  };
 
   const handleEditClick = (task: TaskOwn) => {
     setEditableTaskId(task.id);
@@ -34,7 +42,7 @@ function TaskList({
     setEditStatus(task.attributes.status);
   };
 
-  const handleSave = (id: string, customStatus?: string, task?: TaskOwn) => {
+  const handleSave = (id: string, customStatus?: TaskType, task?: TaskOwn) => {
     editTask(
       id,
       task?.attributes.title ? task?.attributes.title : editTitle,
@@ -46,7 +54,7 @@ function TaskList({
     setEditableTaskId(null);
     setEditTitle('');
     setEditDescription('');
-    setEditStatus('');
+    setEditStatus('notCompleted');
   };
 
   const handleCheck = (task: TaskOwn) => {
@@ -59,18 +67,28 @@ function TaskList({
     setEditableTaskId(null);
     setEditTitle('');
     setEditDescription('');
-    setEditStatus('');
+    setEditStatus('notCompleted');
   };
 
   const handleDelete = (id: string) => {
     deleteTask(id);
   };
 
+  useEffect(() => {
+    const savedFavoriteIds = JSON.parse(
+      localStorage.getItem('favoriteIds') || '[]'
+    );
+    savedFavoriteIds.forEach((id: string) => {
+      if (!favoriteIds.includes(id)) toggleFavorite(id);
+    });
+  }, [toggleFavorite, favoriteIds]);
+
   return (
     <Wrapper>
       {tasks.map((task: TaskOwn) => {
         const { title, description, status } = task.attributes;
         const isEditable = editableTaskId === task.id;
+        const isFavorite = favoriteIds.includes(task.id);
 
         return (
           <Task
@@ -88,7 +106,9 @@ function TaskList({
             onTitleChange={setEditTitle}
             onDescriptionChange={setEditDescription}
             onStatusChange={setEditStatus}
+            onFavoriteToggle={() => handleFavoriteToggle(task.id)}
             buttonText={'Изменить'}
+            isFavorite={isFavorite}
           />
         );
       })}

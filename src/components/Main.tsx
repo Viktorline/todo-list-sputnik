@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTaskStore } from '../store/useTaskStore';
 import { Alert, Spin } from 'antd';
 import TaskList from './TaskList';
+import { TaskType } from '../store/types';
 
 const Wrapper = styled.main`
   padding: 0;
@@ -20,16 +21,18 @@ function Main() {
     tasks,
     isLoadingLists,
     error,
+    favoriteIds,
     fetchTasks,
     addTask,
     editTask,
     deleteTask,
+    toggleFavorite,
   } = useTaskStore();
 
   const [mode, setMode] = useState<'await' | 'create' | 'view'>('await');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState('notCompleted');
+  const [status, setStatus] = useState<TaskType>('notCompleted');
 
   useEffect(() => {
     fetchTasks({});
@@ -79,7 +82,13 @@ function Main() {
           <Spin size='large' />
         </SpinWrapper>
       ) : (
-        <TaskList editTask={editTask} deleteTask={deleteTask} tasks={tasks} />
+        <TaskList
+          favoriteIds={favoriteIds}
+          toggleFavorite={toggleFavorite}
+          editTask={editTask}
+          deleteTask={deleteTask}
+          tasks={tasks}
+        />
       )}
     </Wrapper>
   );

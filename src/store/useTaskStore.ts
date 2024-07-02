@@ -4,6 +4,7 @@ import { postTask, getTasks, deleteTask, putTask } from '../api/todoApi';
 
 export interface TaskState {
   tasks: TaskOwn[];
+  favoriteIds: string[];
   filter: FilterType;
   isLoadingLists: boolean;
   error: string | null;
@@ -17,6 +18,7 @@ export interface TaskState {
   ) => void;
   fetchTasks: (params: any) => void;
   deleteTask: (id: string) => void;
+  toggleFavorite: (id: string) => void;
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
@@ -24,8 +26,22 @@ export const useTaskStore = create<TaskState>((set) => ({
   filter: 'all',
   error: null,
   isLoadingLists: false,
+  favoriteIds: JSON.parse(localStorage.getItem('favoriteIds') || '[]'),
 
   setFilter: (filter: FilterType) => set({ filter }),
+
+  toggleFavorite: (id: string) => {
+    set((state) => {
+      const isFavorite = state.favoriteIds.includes(id);
+      const newFavoriteIds = isFavorite
+        ? state.favoriteIds.filter((favId) => favId !== id)
+        : [...state.favoriteIds, id];
+
+      localStorage.setItem('favoriteIds', JSON.stringify(newFavoriteIds));
+
+      return { favoriteIds: newFavoriteIds };
+    });
+  },
 
   fetchTasks: async (params: any) => {
     set({ isLoadingLists: true, error: null });

@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import styled from 'styled-components';
-import { Button, Col, Input, Row, Select, Space, Spin, Tooltip } from 'antd';
+import { Button, Col, Input, Select, Tooltip } from 'antd';
 import { useClickOutside } from '../hooks/useClickOutside';
-import { filterItems } from '../content/constants';
-import { CheckOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { taskTypes } from '../content/constants';
+import {
+  CheckOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  StarOutlined,
+  StarFilled,
+} from '@ant-design/icons';
+import { TaskType } from '../store/types';
 
 const { Option } = Select;
 
@@ -11,6 +18,11 @@ const Wrapper = styled.div`
   padding: 2rem;
   background-color: #f8f8f8;
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+
+  &.completed {
+    background-color: #c1fab2;
+    border-color: #e0ffd0;
+  }
 `;
 
 const TitleInput = styled(Input)`
@@ -33,24 +45,45 @@ const TextWrapper = styled.div`
   white-space: normal;
 `;
 
-const CheckButton = styled(Button)<{ status: string }>`
-  background-color: ${(props) =>
-    props.status === 'completed' ? '#52c41a' : '#fff'};
-  border-color: ${(props) =>
-    props.status === 'completed' ? '#52c41a' : '#d9d9d9'};
-  color: ${(props) => (props.status === 'completed' ? 'white' : 'initial')};
+const CheckButton = styled(Button)`
+  &.completed {
+    background-color: #52c41a;
+    border-color: #52c41a;
+    color: white;
+  }
 
   &:hover {
     border-color: #52c41a !important;
     color: #52c41a !important;
   }
+
   &:active {
     background-color: #52c41a !important;
     border-color: #52c41a !important;
     color: white !important;
   }
 `;
+const StarButton = styled(Button)`
+  background-color: #fff;
+  border-color: #d9d9d9;
+  color: initial;
 
+  &.favorite {
+    background-color: #ffba00;
+    border-color: #ffba00;
+    color: white;
+  }
+
+  &:hover {
+    border-color: #ffba00 !important;
+    color: #ffba00 !important;
+  }
+  &:active {
+    background-color: #ffba00 !important;
+    border-color: #ffba00 !important;
+    color: white !important;
+  }
+`;
 const EditButton = styled(Button)`
   &:hover {
     border-color: #2b7de1 !important;
@@ -80,8 +113,9 @@ interface EditableBlockProps {
   mode: 'await' | 'create' | 'view';
   title: string;
   description: string;
-  status: string;
+  status: TaskType;
   buttonText: string;
+  isFavorite?: boolean;
   onClick: () => void;
   onClose: () => void;
   onSave: () => void;
@@ -89,7 +123,8 @@ interface EditableBlockProps {
   onDelete?: (value: string) => void;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
+  onStatusChange: (value: TaskType) => void;
+  onFavoriteToggle?: () => void;
 }
 
 function Task({
@@ -99,6 +134,7 @@ function Task({
   description,
   status,
   buttonText,
+  isFavorite,
   onClick,
   onClose,
   onSave,
@@ -107,15 +143,27 @@ function Task({
   onTitleChange,
   onDescriptionChange,
   onStatusChange,
+  onFavoriteToggle,
 }: EditableBlockProps) {
   const editorFieldRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Wrapper key={id}>
+    <Wrapper key={id} className={status === 'completed' ? 'completed' : ''}>
       <div ref={editorFieldRef}>
         {mode === 'view' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Col style={{ display: 'flex', gap: '0.5rem' }}>
+              <Tooltip
+                title={
+                  isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'
+                }
+              >
+                <StarButton
+                  icon={isFavorite ? <StarFilled /> : <StarOutlined />}
+                  className={isFavorite ? 'favorite' : ''}
+                  onClick={onFavoriteToggle}
+                />
+              </Tooltip>
               <Tooltip
                 title={
                   status === 'notCompleted'
@@ -124,7 +172,7 @@ function Task({
                 }
               >
                 <CheckButton
-                  status={status}
+                  className={status === 'completed' ? 'completed' : ''}
                   onClick={onCheck}
                   icon={<CheckOutlined />}
                 />
@@ -171,13 +219,11 @@ function Task({
                 onChange={onStatusChange}
                 style={{ width: '100%', marginBottom: '0.5rem' }}
               >
-                {filterItems
-                  .filter((item) => item.key !== 'all')
-                  .map((item) => (
-                    <Option key={item.key} value={item.key}>
-                      {item.label}
-                    </Option>
-                  ))}
+                {taskTypes.map((item) => (
+                  <Option key={item.key} value={item.key}>
+                    {item.label}
+                  </Option>
+                ))}
               </Select>
               <Button
                 type='primary'
