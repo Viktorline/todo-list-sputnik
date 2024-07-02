@@ -1,30 +1,54 @@
-# React + TypeScript + Vite
+# Todo-List App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Features:
 
-Currently, two official plugins are available:
+- Add a task
+- Delete a task
+- Get the list of all tasks
+- Change the task
+- Infinite Scroll
+- Mark tasks as favorite, and display favorite tasks even after page reload
+- Filter tasks by "All", "Completed", "Not Completed", and "Favorite"
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
 
-## Expanding the ESLint configuration
+- React
+- TypeScript
+- Zustand (state management)
+- AntDesign (UI library)
+- Styled Components (styling)
+- Vite (project setup and build)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Getting Started
 
-- Configure the top-level `parserOptions` property like this:
+1. Clone the repository:
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+   ```sh
+   git clone https://github.com/Viktorline/todo-list-sputnik.git
+   cd todo-list-sputnik
+   ```
+
+2. Install the dependencies:
+   ```sh
+   npm install
+   ```
+
+### Running the Application
+
+To start the development server, run:
+
+```sh
+npm run dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+To build the project for prod, run:
+
+```sh
+npm run build
+```
+
+To preview the prod build, run:
+
+```sh
+npm run preview
+```
