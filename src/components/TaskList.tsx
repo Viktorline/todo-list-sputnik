@@ -34,12 +34,25 @@ function TaskList({
     setEditStatus(task.attributes.status);
   };
 
-  const handleSave = (id: string) => {
-    editTask(id, editTitle, editDescription, editStatus);
+  const handleSave = (id: string, customStatus?: string, task?: TaskOwn) => {
+    editTask(
+      id,
+      task?.attributes.title ? task?.attributes.title : editTitle,
+      task?.attributes.description
+        ? task?.attributes.description
+        : editDescription,
+      customStatus ? customStatus : editStatus
+    );
     setEditableTaskId(null);
     setEditTitle('');
     setEditDescription('');
     setEditStatus('');
+  };
+
+  const handleCheck = (task: TaskOwn) => {
+    task.attributes.status === 'completed'
+      ? handleSave(task.id, 'notCompleted', task)
+      : handleSave(task.id, 'completed', task);
   };
 
   const handleClose = () => {
@@ -69,6 +82,7 @@ function TaskList({
             status={isEditable ? editStatus : status}
             onClick={() => handleEditClick(task)}
             onSave={() => handleSave(task.id)}
+            onCheck={() => handleCheck(task)}
             onClose={handleClose}
             onDelete={handleDelete}
             onTitleChange={setEditTitle}

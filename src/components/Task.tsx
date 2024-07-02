@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Button, Col, Input, Row, Select, Space, Spin } from 'antd';
+import { Button, Col, Input, Row, Select, Space, Spin, Tooltip } from 'antd';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { filterItems } from '../content/constants';
 import { CheckOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -33,6 +33,48 @@ const TextWrapper = styled.div`
   white-space: normal;
 `;
 
+const CheckButton = styled(Button)<{ status: string }>`
+  background-color: ${(props) =>
+    props.status === 'completed' ? '#52c41a' : '#fff'};
+  border-color: ${(props) =>
+    props.status === 'completed' ? '#52c41a' : '#d9d9d9'};
+  color: ${(props) => (props.status === 'completed' ? 'white' : 'initial')};
+
+  &:hover {
+    border-color: #52c41a !important;
+    color: #52c41a !important;
+  }
+  &:active {
+    background-color: #52c41a !important;
+    border-color: #52c41a !important;
+    color: white !important;
+  }
+`;
+
+const EditButton = styled(Button)`
+  &:hover {
+    border-color: #2b7de1 !important;
+    color: #2b7de1 !important;
+  }
+  &:active {
+    background-color: #2b7de1 !important;
+    border-color: #2b7de1 !important;
+    color: white !important;
+  }
+`;
+
+const BucketButton = styled(Button)`
+  &:hover {
+    border-color: #e12b2b !important;
+    color: #c41a2e !important;
+  }
+  &:active {
+    background-color: #e12b2b !important;
+    border-color: #e12b2b !important;
+    color: white !important;
+  }
+`;
+
 interface EditableBlockProps {
   id: string;
   mode: 'await' | 'create' | 'view';
@@ -43,6 +85,7 @@ interface EditableBlockProps {
   onClick: () => void;
   onClose: () => void;
   onSave: () => void;
+  onCheck?: () => void;
   onDelete?: (value: string) => void;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
@@ -59,6 +102,7 @@ function Task({
   onClick,
   onClose,
   onSave,
+  onCheck,
   onDelete,
   onTitleChange,
   onDescriptionChange,
@@ -72,8 +116,22 @@ function Task({
         {mode === 'view' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Col style={{ display: 'flex', gap: '0.5rem' }}>
-              <Button icon={<CheckOutlined />} />
-              <Button onClick={onClick} icon={<EditOutlined />} />
+              <Tooltip
+                title={
+                  status === 'notCompleted'
+                    ? 'Отметить как выполненное'
+                    : 'Отметить как невыполненое'
+                }
+              >
+                <CheckButton
+                  status={status}
+                  onClick={onCheck}
+                  icon={<CheckOutlined />}
+                />
+              </Tooltip>
+              <Tooltip title='Редактировать'>
+                <EditButton onClick={onClick} icon={<EditOutlined />} />
+              </Tooltip>
             </Col>
             <Col flex='auto'>
               <TextWrapper>
@@ -82,7 +140,12 @@ function Task({
               </TextWrapper>
             </Col>
             <Col>
-              <Button onClick={() => onDelete!(id)} icon={<DeleteOutlined />} />
+              <Tooltip title='Удалить'>
+                <BucketButton
+                  onClick={() => onDelete!(id)}
+                  icon={<DeleteOutlined />}
+                />
+              </Tooltip>
             </Col>
           </div>
         ) : (
