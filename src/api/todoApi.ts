@@ -10,7 +10,6 @@ const api = axios.create({
 
 export const getTasks = async (params = {}) => {
   const response = await api.get('/tasks', { params });
-  console.log(response.data);
   return response.data;
 };
 
@@ -20,6 +19,22 @@ export const postTask = async (
   status: TaskType
 ) => {
   const response = await api.post('/tasks', {
+    data: {
+      title,
+      description,
+      status,
+    },
+  });
+  return response.data;
+};
+
+export const putTask = async (
+  id: string,
+  title: string,
+  description: string,
+  status: TaskType
+) => {
+  const response = await api.put(`/tasks/${id}`, {
     data: {
       title,
       description,

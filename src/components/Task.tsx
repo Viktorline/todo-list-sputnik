@@ -1,6 +1,6 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Button, Col, Input, Row, Select, Space } from 'antd';
+import { Button, Col, Input, Row, Select, Space, Spin } from 'antd';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { filterItems } from '../content/constants';
 import { CheckOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -89,7 +89,7 @@ function Task({
           <TitleInput
             placeholder={mode === 'await' ? 'Добавить задачу' : 'Заголовок'}
             value={title}
-            onClick={onClick}
+            onClick={mode !== 'create' ? onClick : () => {}}
             onChange={(e) => onTitleChange(e.target.value)}
           />
         )}
@@ -105,7 +105,7 @@ function Task({
             <Controls>
               <Select
                 value={status}
-                onChange={(value) => onStatusChange(value)}
+                onChange={onStatusChange}
                 style={{ width: '100%', marginBottom: '0.5rem' }}
               >
                 {filterItems

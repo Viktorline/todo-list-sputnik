@@ -1,8 +1,7 @@
 import styled from 'styled-components';
 import Task from './Task';
 import { useState } from 'react';
-import { TaskOwn } from '../store/types';
-import { useTaskStore } from '../store/useTaskStore';
+import { TaskOwn, TaskType } from '../store/types';
 
 const Wrapper = styled.ul`
   overflow-y: auto;
@@ -11,35 +10,43 @@ const Wrapper = styled.ul`
 
 function TaskList({
   tasks,
+  editTask,
   deleteTask,
 }: {
   tasks: any;
+  editTask: (
+    id: string,
+    title: string,
+    description: string,
+    status: TaskType
+  ) => void;
   deleteTask: (id: string) => void;
 }) {
   const [editableTaskId, setEditableTaskId] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [status, setStatus] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editStatus, setEditStatus] = useState('');
 
   const handleEditClick = (task: TaskOwn) => {
     setEditableTaskId(task.id);
-    setTitle(task.attributes.title);
-    setDescription(task.attributes.description);
-    setStatus(task.attributes.status);
+    setEditTitle(task.attributes.title);
+    setEditDescription(task.attributes.description);
+    setEditStatus(task.attributes.status);
   };
 
-  const handleSave = () => {
+  const handleSave = (id: string) => {
+    editTask(id, editTitle, editDescription, editStatus);
     setEditableTaskId(null);
-    setTitle('');
-    setDescription('');
-    setStatus('');
+    setEditTitle('');
+    setEditDescription('');
+    setEditStatus('');
   };
 
   const handleClose = () => {
     setEditableTaskId(null);
-    setTitle('');
-    setDescription('');
-    setStatus('');
+    setEditTitle('');
+    setEditDescription('');
+    setEditStatus('');
   };
 
   const handleDelete = (id: string) => {
@@ -50,22 +57,23 @@ function TaskList({
     <Wrapper>
       {tasks.map((task: TaskOwn) => {
         const { title, description, status } = task.attributes;
+        const isEditable = editableTaskId === task.id;
 
         return (
           <Task
             key={task.id}
             id={task.id}
-            mode={editableTaskId === task.id ? 'create' : 'view'}
-            title={title}
-            description={description}
-            status={status}
+            mode={isEditable ? 'create' : 'view'}
+            title={isEditable ? editTitle : title}
+            description={isEditable ? editDescription : description}
+            status={isEditable ? editStatus : status}
             onClick={() => handleEditClick(task)}
-            onSave={handleSave}
+            onSave={() => handleSave(task.id)}
             onClose={handleClose}
             onDelete={handleDelete}
-            onTitleChange={setTitle}
-            onDescriptionChange={setDescription}
-            onStatusChange={setStatus}
+            onTitleChange={setEditTitle}
+            onDescriptionChange={setEditDescription}
+            onStatusChange={setEditStatus}
             buttonText={'Изменить'}
           />
         );

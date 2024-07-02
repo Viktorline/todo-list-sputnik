@@ -2,15 +2,29 @@ import styled from 'styled-components';
 import Task from './Task';
 import { useEffect, useState } from 'react';
 import { useTaskStore } from '../store/useTaskStore';
-import { Button, Spin } from 'antd';
+import { Alert, Spin } from 'antd';
 import TaskList from './TaskList';
 
 const Wrapper = styled.main`
   padding: 0;
 `;
 
+const SpinWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+`;
+
 function Main() {
-  const { addTask, fetchTasks, deleteTask, isLoading, tasks } = useTaskStore();
+  const {
+    tasks,
+    isLoadingLists,
+    error,
+    fetchTasks,
+    addTask,
+    editTask,
+    deleteTask,
+  } = useTaskStore();
 
   const [mode, setMode] = useState<'await' | 'create' | 'view'>('await');
   const [title, setTitle] = useState('');
@@ -28,16 +42,18 @@ function Main() {
   };
 
   const handleSave = async () => {
-    addTask(title, description, 'notCompleted');
+    addTask(title, description, status);
     setMode('await');
     setTitle('');
     setDescription('');
+    setStatus('notCompleted');
   };
 
   const handleClose = () => {
     setMode('await');
     setTitle('');
     setDescription('');
+    setStatus('notCompleted');
   };
 
   return (
@@ -54,12 +70,16 @@ function Main() {
         onTitleChange={setTitle}
         onDescriptionChange={setDescription}
         onStatusChange={setStatus}
-        buttonText={'Далее'}
+        buttonText={'Добавить'}
       />
-      {isLoading ? (
-        <Spin size='large' />
+      {error ? (
+        <Alert message={'error'} type='error' />
+      ) : isLoadingLists ? (
+        <SpinWrapper>
+          <Spin size='large' />
+        </SpinWrapper>
       ) : (
-        <TaskList deleteTask={deleteTask} tasks={tasks} />
+        <TaskList editTask={editTask} deleteTask={deleteTask} tasks={tasks} />
       )}
     </Wrapper>
   );

@@ -1,51 +1,77 @@
 import { create } from 'zustand';
 import { FilterType, TaskOwn, TaskType } from './types';
-import { postTask, getTasks, deleteTask } from '../api/todoApi';
-import mockData from '../mock.json';
+import { postTask, getTasks, deleteTask, putTask } from '../api/todoApi';
 
 export interface TaskState {
   tasks: TaskOwn[];
-  isLoading: boolean;
   filter: FilterType;
+  isLoadingLists: boolean;
+  error: string | null;
   setFilter: (filter: FilterType) => void;
   addTask: (title: string, description: string, status: TaskType) => void;
+  editTask: (
+    id: string,
+    title: string,
+    description: string,
+    status: TaskType
+  ) => void;
   fetchTasks: (params: any) => void;
   deleteTask: (id: string) => void;
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: [],
-  isLoading: true,
   filter: 'all',
+  error: null,
+  isLoadingLists: false,
 
   setFilter: (filter: FilterType) => set({ filter }),
 
   fetchTasks: async (params: any) => {
-    set({ isLoading: true });
-    const newTask = await getTasks(params);
-
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    set({ tasks: newTask.data as TaskOwn[], isLoading: false });
+    set({ isLoadingLists: true, error: null });
+    try {
+      const newTask = await getTasks(params);
+      set({
+        tasks: (newTask.data as TaskOwn[]).reverse(),
+        isLoadingLists: false,
+      });
+    } catch (error) {
+      set({
+        error: 'Ошибка загрузки сообщений. Попробуйте перезагрузить страницу',
+        isLoadingLists: false,
+      });
+    }
   },
 
   addTask: async (title: string, description: string, status: TaskType) => {
-    // set({ isLoading: true });
     const newTask = await postTask(title, description, status);
-
     set((state) => ({
       tasks: [newTask.data, ...state.tasks],
-      // isLoading: false,
+    }));
+  },
+
+  editTask: async (
+    id: string,
+    title: string,
+    description: string,
+    status: TaskType
+  ) => {
+    const updatedTask = await putTask(id, title, description, status);
+    console.log(updatedTask);
+
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id
+          ? { ...task, attributes: updatedTask.data.attributes }
+          : task
+      ),
     }));
   },
 
   deleteTask: async (id: string) => {
-    // set({ isLoading: true });
     await deleteTask(id);
-
     set((state) => ({
       tasks: state.tasks.filter((task) => task.id !== id),
-
-      // isLoading: false,
     }));
   },
 }));
